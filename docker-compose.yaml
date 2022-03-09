@@ -1,0 +1,37 @@
+version: "3.5"
+
+services:
+  db:
+    image: postgres:11
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+    networks:
+      - container_localnet
+    ports:
+      - 5439:5432
+    env_file: ../web3-lock/src/.env
+
+
+  api:
+    build:
+      context: ../web3-lock
+    networks:
+      - container_localnet
+    volumes:
+      - ./src:/opt/app
+    ports:
+    - 8000:8000
+    env_file: ../web3-lock/src/.env
+    depends_on:
+      - db-economy
+    command: bash -c "pipenv run uvicorn main:app --lifespan on --host 0.0.0.0 --reload"
+
+#    command: bash -c "pipenv run alembic revision --autogenerate --head head"
+
+
+networks:
+  container_localnet:
+    external: true
+
+volumes:
+   pg-data:
